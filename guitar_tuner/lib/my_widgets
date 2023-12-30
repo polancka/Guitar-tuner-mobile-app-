@@ -60,31 +60,6 @@ Align reusableTextField(String hinttext, TextEditingController controller,
 }
 
 //Login button
-SizedBox logInButton(
-    BuildContext context, String text, String instrument, String tuning) {
-  return SizedBox(
-    width: MediaQuery.of(context).size.width,
-    height: 40,
-    child: TextButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => TuningPage(
-                    instrument: selectedInstrument,
-                    tuning: selectedNote)),
-          );
-        },
-        style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20))),
-            backgroundColor: MaterialStateProperty.resolveWith((states) {
-              return Colors.white;
-            })),
-        child: Text(text, style: TextStyle(color: Styles.deepgreen))),
-  );
-}
 
 //Register button
 SizedBox regButton(BuildContext context, String text, String email,
