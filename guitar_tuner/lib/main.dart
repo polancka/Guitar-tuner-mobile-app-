@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.grey,
       ),
-      home: MyHomePage(),
+      home: const TuningPage(instrument: "Guitar", tuning: "drop D"),
     );
   }
 }
