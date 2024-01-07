@@ -10,8 +10,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String? selectedInstrument = null;
-  String? selectedNote = null;
+  String? selectedInstrument = "Guitar";
+  String? selectedNote = "EADGBE";
   bool isButtonEnabled = false;
 
   @override
@@ -57,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(height: 20),
                     // first dropdown
                     DropdownButton(
+                      value: selectedInstrument,
                       dropdownColor: Styles.deepgreen,
                       items: [
                         DropdownMenuItem(
@@ -67,25 +68,28 @@ class _MyHomePageState extends State<MyHomePage> {
                           )),
                           value: "Guitar",
                         ),
-                        DropdownMenuItem(
-                          child: Center(
-                              child: Text(
-                            "Ukulele",
-                            style: TextStyle(color: Colors.white),
-                          )),
-                          value: "Ukulele",
-                        ),
-                        DropdownMenuItem(
-                          child: Center(
-                              child: Text(
-                            "Violin",
-                            style: TextStyle(color: Colors.white),
-                          )),
-                          value: "Violin",
-                        )
+                        // DropdownMenuItem(
+                        //   child: Center(
+                        //       child: Text(
+                        //     "Ukulele",
+                        //     style: TextStyle(color: Colors.white),
+                        //   )),
+                        //   value: "Ukulele",
+                        // ),
+                        // DropdownMenuItem(
+                        //   child: Center(
+                        //       child: Text(
+                        //     "Violin",
+                        //     style: TextStyle(color: Colors.white),
+                        //   )),
+                        //   value: "Violin",
+                        // )
                       ],
-                      value: selectedInstrument,
-                      onChanged: dropdownInstrumentCallback,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedInstrument = newValue!;
+                        });
+                      },
                       iconEnabledColor: Styles.deepgreen,
                       isExpanded: true,
                     ),
@@ -104,8 +108,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
                     DropdownButton(
                       dropdownColor: Styles.deepgreen,
-                      items: buildNoteDropdownItems(selectedInstrument),
                       value: selectedNote,
+                      items: [
+                        DropdownMenuItem(
+                            value: "EADGBE",
+                            child: Center(
+                                child: Text("EADGBE",
+                                    style: TextStyle(color: Colors.white)))),
+                        DropdownMenuItem(
+                            value: "drop D",
+                            child: Center(
+                                child: Text("drop D",
+                                    style: TextStyle(color: Colors.white)))),
+                      ],
                       onChanged: dropdownTuningCallback,
                       iconEnabledColor: Styles.deepgreen,
                       isExpanded: true,
@@ -151,9 +166,9 @@ class _MyHomePageState extends State<MyHomePage> {
     if (selectedInstrument == "Guitar") {
       return [
         DropdownMenuItem(
-            value: "EADGHE",
+            value: "EADGBE",
             child: Center(
-                child: Text("EADGHE", style: TextStyle(color: Colors.white)))),
+                child: Text("EADGBE", style: TextStyle(color: Colors.white)))),
         DropdownMenuItem(
             value: "drop D",
             child: Center(

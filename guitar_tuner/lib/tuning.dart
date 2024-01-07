@@ -23,15 +23,28 @@ class _TuningPageState extends State<TuningPage> {
   final pitchupDart = PitchHandler(InstrumentType.guitar);
 
   var note = "";
+  var wantednote = 0.0;
+  var current_freq = 0.0;
   var status = "";
   var current_note = "";
   var listeningStatus = "Not listening";
+  var curr_status = "";
   bool isListening = false;
+  bool dropD = false;
 
   @override
   void initState() {
     super.initState();
+    checkTuning();
     getMicPermission();
+  }
+
+  checkTuning() {
+    if (widget.tuning == "drop D") {
+      setState(() {
+        dropD = true;
+      });
+    }
   }
 
   getMicPermission() async {
@@ -59,10 +72,86 @@ class _TuningPageState extends State<TuningPage> {
     final pitch = pitchDetectorDart.getPitch(audioSample);
     if (pitch.pitched) {
       final handledPitchresult = pitchupDart.handlePitch(pitch.pitch);
+      if (handledPitchresult.tuningStatus.toString() == "TuningStatus.tuned") {
+        curr_status = "Tuned! Next string!";
+      } else if (handledPitchresult.tuningStatus.toString() ==
+              "TuningStatus.toolow" ||
+          handledPitchresult.tuningStatus.toString() ==
+              "TuningStatus.waytoolow") {
+        curr_status = "Too low! Tune up!";
+      } else if (handledPitchresult.tuningStatus.toString() ==
+              "TuningStatus.toohigh" ||
+          handledPitchresult.tuningStatus.toString() ==
+              "TuningStatus.waytoohigh") {
+        curr_status = "Too high! Tune down!";
+      } else if (handledPitchresult.tuningStatus.toString() ==
+          "TuningStatus.undefined") {
+        curr_status = "The pitch is not close to any expected guitar note!";
+      }
       setState(() {
         note = handledPitchresult.note;
-        status = handledPitchresult.tuningStatus.toString();
+        status = curr_status;
+        wantednote = handledPitchresult.expectedFrequency;
+        current_freq = wantednote + handledPitchresult.diffFrequency;
       });
+    }
+  }
+
+  Row rowOfNotes() {
+    if (!dropD) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("E", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("A", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("D", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("G", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("B", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("E", style: TextStyle(color: Colors.white))
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("D", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("A", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("D", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("G", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("H", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 30,
+          ),
+          Text("E", style: TextStyle(color: Colors.white))
+        ],
+      );
     }
   }
 
@@ -80,7 +169,7 @@ class _TuningPageState extends State<TuningPage> {
         sampleRate: 44100, bufferSize: 3000);
     setState(() {
       note = "";
-      status = "Pluck a string!";
+      status = "";
     });
   }
 
@@ -94,6 +183,8 @@ class _TuningPageState extends State<TuningPage> {
     setState(() {
       note = "";
       status = "";
+      current_freq = 0.0;
+      wantednote = 0.0;
     });
 
     // save the audio, obdelaj
@@ -110,8 +201,12 @@ class _TuningPageState extends State<TuningPage> {
     var show_instrument = widget.instrument;
     var show_tuning = widget.tuning;
     return Scaffold(
-        extendBodyBehindAppBar: true,
+        extendBodyBehindAppBar: false,
         appBar: AppBar(
+          title: Text(
+            "$show_instrument : $show_tuning",
+            style: TextStyle(color: Colors.green[900]),
+          ),
           leading: Builder(
             builder: (BuildContext context) {
               return IconButton(
@@ -138,59 +233,81 @@ class _TuningPageState extends State<TuningPage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("6th", style: TextStyle(color: Colors.white)),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text("5th", style: TextStyle(color: Colors.white)),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text("4th", style: TextStyle(color: Colors.white)),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text("3rd", style: TextStyle(color: Colors.white)),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text("2nd", style: TextStyle(color: Colors.white)),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text("1st", style: TextStyle(color: Colors.white)),
+                  ],
+                ),
                 SizedBox(
-                  height: 60,
+                  height: 10,
                 ),
-                Text(
-                  "Instrument in tuning: $show_instrument", //widget.instrument,
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white), // Set text color to white
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Tuning style: $show_tuning", //widget.tuning,
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white), // Set text color to white
-                ),
-
-                SizedBox(
-                  height: 60,
-                ),
+                rowOfNotes(),
+                SizedBox(height: 30),
                 Text(
                   "Current tone",
                   style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(
-                  height: 15,
                 ),
                 Text(
                   note,
                   style: TextStyle(color: Colors.white, fontSize: 30),
                 ),
-                SizedBox(
-                  height: 5,
+                Text(
+                  "Current frequency",
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  current_freq
+                      .toString()
+                      .substring(0, current_freq.toString().indexOf('.') + 2),
+                  style: TextStyle(color: Colors.white, fontSize: 30),
+                ),
+                Text(
+                  "Expected frequency",
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  wantednote.toString(),
+                  style: TextStyle(color: Colors.white, fontSize: 30),
                 ),
                 Text(
                   current_note,
                   style: TextStyle(color: Colors.white),
                 ),
+                isListening
+                    ? Image.asset('lib/utils/wave.gif')
+                    : Image.asset('lib/utils/still.png'),
                 SizedBox(
-                  height: 30,
-                ),
-                //add gif for listening
-                SizedBox(
-                  height: 40,
+                  height: 25,
                 ),
                 Text(
                   status,
                   style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(
+                  height: 40,
                 ),
                 ElevatedButton(
                   onPressed: isListening ? stopListening : startListening,
@@ -200,9 +317,6 @@ class _TuningPageState extends State<TuningPage> {
                   style: const ButtonStyle(
                       backgroundColor: MaterialStatePropertyAll(Colors.white)),
                 ),
-                isListening
-                    ? Image.asset('lib/utils/wave.gif')
-                    : Image.asset('lib/utils/still.png')
               ],
             ),
           ),
