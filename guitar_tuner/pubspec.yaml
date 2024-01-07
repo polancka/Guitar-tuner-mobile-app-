@@ -39,10 +39,15 @@ dependencies:
   pitchupdart: ^0.0.2
   flutter_audio_capture: ^1.0.0
   permission_handler: ^11.0.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  image_path: "lib/utils/wave.png"
+  android: true
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

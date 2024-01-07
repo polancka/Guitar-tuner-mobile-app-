@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_capture/flutter_audio_capture.dart';
@@ -18,6 +20,7 @@ class TuningPage extends StatefulWidget {
 }
 
 class _TuningPageState extends State<TuningPage> {
+  //defining the variables that will be calculated with or shown on the screen
   final _audioRecorder = FlutterAudioCapture();
   final pitchDetectorDart = PitchDetector(44100, 2000);
   final pitchupDart = PitchHandler(InstrumentType.guitar);
@@ -31,22 +34,40 @@ class _TuningPageState extends State<TuningPage> {
   var curr_status = "";
   bool isListening = false;
   bool dropD = false;
+  var standardFreq = [330.00, 247.00, 196.00, 147.00, 110.00, 82.00];
+  var dropDFreq = [330.00, 247.00, 196.00, 147.00, 110.00, 73.00];
+  var freqs = [];
+  var stringCounter = 6;
+  var boldStyle =
+      TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20);
+  var normalStyle = TextStyle(color: Colors.white);
+  var colorButton = MaterialStatePropertyAll(Colors.white);
 
   @override
   void initState() {
     super.initState();
     checkTuning();
     getMicPermission();
+    // startListening();
   }
 
+  //checking which tuning was picked
   checkTuning() {
     if (widget.tuning == "drop D") {
       setState(() {
         dropD = true;
+        freqs = dropDFreq;
+      });
+    } else {
+      setState(() {
+        dropD = false;
+        freqs = standardFreq;
       });
     }
+    print(freqs);
   }
 
+  //getting permission to access the microphone
   getMicPermission() async {
     var status = await Permission.microphone.status;
     // Permission hasn't been requested yet
@@ -64,101 +85,106 @@ class _TuningPageState extends State<TuningPage> {
     }
   }
 
+  //function for getting the audio input and managing it
   void listener(dynamic obj) {
     //Gets the audio sample
     var buffer = Float64List.fromList(obj.cast<double>());
     final List<double> audioSample = buffer.toList();
 
     final pitch = pitchDetectorDart.getPitch(audioSample);
+
     if (pitch.pitched) {
       final handledPitchresult = pitchupDart.handlePitch(pitch.pitch);
-      if (handledPitchresult.tuningStatus.toString() == "TuningStatus.tuned") {
-        curr_status = "Tuned! Next string!";
-      } else if (handledPitchresult.tuningStatus.toString() ==
-              "TuningStatus.toolow" ||
-          handledPitchresult.tuningStatus.toString() ==
-              "TuningStatus.waytoolow") {
-        curr_status = "Too low! Tune up!";
-      } else if (handledPitchresult.tuningStatus.toString() ==
-              "TuningStatus.toohigh" ||
-          handledPitchresult.tuningStatus.toString() ==
-              "TuningStatus.waytoohigh") {
-        curr_status = "Too high! Tune down!";
-      } else if (handledPitchresult.tuningStatus.toString() ==
-          "TuningStatus.undefined") {
-        curr_status = "The pitch is not close to any expected guitar note!";
+      print(pitch.pitch);
+      var wantedfreq = freqs[stringCounter - 1];
+      if ((wantedfreq - pitch.pitch).abs() < 1) {
+        setState(() {
+          status = "Tuned! Next string!";
+          note = handledPitchresult.note;
+          colorButton = MaterialStatePropertyAll(Colors.green[200]!);
+        });
+      } else if ((wantedfreq - pitch.pitch) <= -1) {
+        setState(() {
+          status = "Tune DOWN!";
+          note = handledPitchresult.note;
+        });
+      } else if ((wantedfreq - pitch.pitch) > 1) {
+        setState(() {
+          status = "Tune UP!";
+          note = handledPitchresult.note;
+        });
       }
       setState(() {
-        note = handledPitchresult.note;
-        status = curr_status;
-        wantednote = handledPitchresult.expectedFrequency;
-        current_freq = wantednote + handledPitchresult.diffFrequency;
+        current_freq = pitch.pitch;
       });
     }
   }
 
+  //grafic element
   Row rowOfNotes() {
     if (!dropD) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("E", style: TextStyle(color: Colors.white)),
+          Text("E", style: stringCounter == 6 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("A", style: TextStyle(color: Colors.white)),
+          Text("A", style: stringCounter == 5 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("D", style: TextStyle(color: Colors.white)),
+          Text("D", style: stringCounter == 4 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("G", style: TextStyle(color: Colors.white)),
+          Text("G", style: stringCounter == 3 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("B", style: TextStyle(color: Colors.white)),
+          Text("B", style: stringCounter == 2 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("E", style: TextStyle(color: Colors.white))
+          Text("E", style: stringCounter == 1 ? boldStyle : normalStyle)
         ],
       );
     } else {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("D", style: TextStyle(color: Colors.white)),
+          Text("D", style: stringCounter == 6 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("A", style: TextStyle(color: Colors.white)),
+          Text("A", style: stringCounter == 5 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("D", style: TextStyle(color: Colors.white)),
+          Text("D", style: stringCounter == 4 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("G", style: TextStyle(color: Colors.white)),
+          Text("G", style: stringCounter == 3 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("H", style: TextStyle(color: Colors.white)),
+          Text("H", style: stringCounter == 2 ? boldStyle : normalStyle),
           SizedBox(
             width: 30,
           ),
-          Text("E", style: TextStyle(color: Colors.white))
+          Text("E", style: stringCounter == 1 ? boldStyle : normalStyle)
         ],
       );
     }
   }
 
+  //error function for listener
   void onError(Object e) {
     print(e);
   }
 
+  //function for starting the listener
   startListening() async {
     print("starting listening");
     setState(() {
@@ -166,13 +192,16 @@ class _TuningPageState extends State<TuningPage> {
     });
     // do audio capturing
     await _audioRecorder.start(listener, onError,
-        sampleRate: 44100, bufferSize: 3000);
+        firstDataTimeout: Duration(seconds: 1),
+        sampleRate: 44100,
+        bufferSize: 3000000);
     setState(() {
       note = "";
       status = "";
     });
   }
 
+  //stoping listening ang clearing the values
   stopListening() async {
     print("stop listening");
     setState(() {
@@ -191,15 +220,39 @@ class _TuningPageState extends State<TuningPage> {
     // izpiši pitch
   }
 
+  //switch strings from higher to lower
+  leftButton() {
+    if (stringCounter < 6) {
+      setState(() {
+        stringCounter += 1;
+        colorButton = MaterialStatePropertyAll(Colors.white);
+      });
+    }
+    print(stringCounter);
+  }
+
+  //switch strings from lower to higher
+  rightButton() {
+    if (stringCounter > 1) {
+      setState(() {
+        stringCounter -= 1;
+        colorButton = MaterialStatePropertyAll(Colors.white);
+      });
+    }
+    print(stringCounter);
+  }
+
   @override
   void dispose() {
     _audioRecorder.stop();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     var show_instrument = widget.instrument;
     var show_tuning = widget.tuning;
+
     return Scaffold(
         extendBodyBehindAppBar: false,
         appBar: AppBar(
@@ -238,27 +291,36 @@ class _TuningPageState extends State<TuningPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("6th", style: TextStyle(color: Colors.white)),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    Text("6th",
+                        style: stringCounter == 6 ? boldStyle : normalStyle),
                     SizedBox(
                       width: 15,
                     ),
-                    Text("5th", style: TextStyle(color: Colors.white)),
+                    Text("5th",
+                        style: stringCounter == 5 ? boldStyle : normalStyle),
                     SizedBox(
                       width: 15,
                     ),
-                    Text("4th", style: TextStyle(color: Colors.white)),
+                    Text("4th",
+                        style: stringCounter == 4 ? boldStyle : normalStyle),
                     SizedBox(
                       width: 15,
                     ),
-                    Text("3rd", style: TextStyle(color: Colors.white)),
+                    Text("3rd",
+                        style: stringCounter == 3 ? boldStyle : normalStyle),
                     SizedBox(
                       width: 15,
                     ),
-                    Text("2nd", style: TextStyle(color: Colors.white)),
+                    Text("2nd",
+                        style: stringCounter == 2 ? boldStyle : normalStyle),
                     SizedBox(
                       width: 15,
                     ),
-                    Text("1st", style: TextStyle(color: Colors.white)),
+                    Text("1st",
+                        style: stringCounter == 1 ? boldStyle : normalStyle),
                   ],
                 ),
                 SizedBox(
@@ -266,6 +328,22 @@ class _TuningPageState extends State<TuningPage> {
                 ),
                 rowOfNotes(),
                 SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: leftButton,
+                        child: Icon(Icons.arrow_left),
+                        style: ButtonStyle(backgroundColor: colorButton)),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    ElevatedButton(
+                        onPressed: rightButton,
+                        child: Icon(Icons.arrow_right),
+                        style: ButtonStyle(backgroundColor: colorButton))
+                  ],
+                ),
                 Text(
                   "Current tone",
                   style: TextStyle(color: Colors.white),
@@ -289,7 +367,7 @@ class _TuningPageState extends State<TuningPage> {
                   style: TextStyle(color: Colors.white),
                 ),
                 Text(
-                  wantednote.toString(),
+                  freqs[stringCounter - 1].toString(),
                   style: TextStyle(color: Colors.white, fontSize: 30),
                 ),
                 Text(

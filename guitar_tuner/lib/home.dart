@@ -11,7 +11,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String? selectedInstrument = "Guitar";
-  String? selectedNote = "EADGBE";
+  String? selectedNote = "Standard";
   bool isButtonEnabled = false;
 
   @override
@@ -111,9 +111,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       value: selectedNote,
                       items: [
                         DropdownMenuItem(
-                            value: "EADGBE",
+                            value: "Standard",
                             child: Center(
-                                child: Text("EADGBE",
+                                child: Text("Standard",
                                     style: TextStyle(color: Colors.white)))),
                         DropdownMenuItem(
                             value: "drop D",

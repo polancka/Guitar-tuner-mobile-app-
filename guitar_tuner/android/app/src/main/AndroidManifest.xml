@@ -3,7 +3,7 @@
    <application
         android:label="guitar_tuner"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/still">
         <activity
             android:name=".MainActivity"
             android:exported="true"
